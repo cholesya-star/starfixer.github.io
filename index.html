@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Starfixer: Последний сигнал — атмосферное космическое приключение с энергетическими головоломками на древней орбитальной станции.">
+    <meta name="theme-color" content="#06060e">
+    <title>Starfixer: Последний сигнал</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #06060e;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            overflow-x: hidden;
+        }
+        #starfield-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+ 
+        /* ===== DEMO SECTION ===== */
+        .demo-section {
+            position: relative;
+            z-index: 1;
+            padding: 6rem 0 4rem;
+        }
+ 
+        .demo-section .section-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+ 
+        .demo-intro {
+            color: #a0a0b8;
+            font-size: 1.05rem;
+            margin-bottom: 2rem;
+            max-width: 640px;
+        }
+ 
+        /* Обёртка с рамкой-рамкой как у терминала */
+        .demo-frame-wrap {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #040810;
+            border: 1px solid rgba(0, 212, 255, 0.25);
+            box-shadow:
+                0 0 0 1px rgba(0,212,255,0.08),
+                0 0 60px rgba(0, 212, 255, 0.08),
+                inset 0 0 80px rgba(0,0,0,0.6);
+        }
+ 
+        /* Декоративная «шапка» терминала */
+        .demo-terminal-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: rgba(0, 212, 255, 0.04);
+            border-bottom: 1px solid rgba(0,212,255,0.12);
+        }
+ 
+        .terminal-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(0,212,255,0.2);
+            border: 1px solid rgba(0,212,255,0.35);
+        }
+        .terminal-dot.active {
+            background: rgba(0,212,255,0.55);
+            box-shadow: 0 0 6px rgba(0,212,255,0.5);
+        }
+ 
+        .terminal-label {
+            margin-left: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.72rem;
+            letter-spacing: 0.12em;
+            color: rgba(0,212,255,0.45);
+        }
+ 
+        .terminal-status {
+            margin-left: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.68rem;
+            letter-spacing: 0.1em;
+            color: rgba(0,212,255,0.35);
+        }
+        .terminal-status.live {
+            color: rgba(0,255,140,0.7);
+        }
+        .terminal-status.live::before {
+            content: '● ';
+        }
+ 
+        /* iframe обёртка с адаптивным соотношением сторон */
+        .demo-iframe-container {
+            position: relative;
+            width: 100%;
+            /* 16:9 для игры */
+            padding-bottom: 56.25%;
+            background: #040810;
+        }
+ 
+        .demo-iframe-container iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+ 
+        /* Оверлей «нажми чтобы начать» поверх iframe */
+        .demo-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(4, 8, 16, 0.82);
+            backdrop-filter: blur(6px);
+            z-index: 10;
+            cursor: pointer;
+            transition: opacity 0.4s ease;
+        }
+ 
+        .demo-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+ 
+        .demo-overlay-icon {
+            font-size: 3.5rem;
+            color: #00d4ff;
+            text-shadow: 0 0 30px rgba(0,212,255,0.7);
+            margin-bottom: 1rem;
+            animation: pulse-overlay 2s infinite alternate;
+        }
+ 
+        @keyframes pulse-overlay {
+            from { text-shadow: 0 0 15px rgba(0,212,255,0.5); transform: scale(1); }
+            to   { text-shadow: 0 0 40px rgba(0,212,255,0.9); transform: scale(1.08); }
+        }
+ 
+        .demo-overlay-title {
+            font-family: 'Courier New', monospace;
+            font-size: clamp(1.4rem, 3vw, 2rem);
+            letter-spacing: 0.25em;
+            color: #00d4ff;
+            text-shadow: 0 0 20px rgba(0,212,255,0.5);
+            margin-bottom: 0.5rem;
+        }
+ 
+        .demo-overlay-sub {
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            letter-spacing: 0.2em;
+            color: rgba(0,212,255,0.5);
+            margin-bottom: 2rem;
+        }
+ 
+        .demo-overlay-btn {
+            padding: 12px 40px;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            font-weight: bold;
+            letter-spacing: 0.18em;
+            color: #040810;
+            background: #00d4ff;
+            border: none;
+            cursor: pointer;
+            clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+            box-shadow: 0 0 20px rgba(0,212,255,0.5);
+            transition: transform 0.15s, box-shadow 0.2s;
+        }
+ 
+        .demo-overlay-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 35px rgba(0,212,255,0.8);
+        }
+ 
+        /* Подсказки управления под игрой */
+        .demo-controls-hint {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem 2rem;
+            margin-top: 1.5rem;
+            padding: 1rem 1.4rem;
+            background: rgba(8, 15, 32, 0.6);
+            border: 1px solid rgba(0,212,255,0.1);
+            border-radius: 10px;
+        }
+ 
+        .hint-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.82rem;
+            color: #6a8aaa;
+            font-family: 'Courier New', monospace;
+        }
+ 
+        .hint-key {
+            background: rgba(0,212,255,0.1);
+            border: 1px solid rgba(0,212,255,0.25);
+            border-radius: 4px;
+            padding: 2px 7px;
+            color: #00d4ff;
+            font-size: 0.75rem;
+            white-space: nowrap;
+        }
+ 
+        /* Адаптив */
+        @media (max-width: 768px) {
+            .demo-controls-hint {
+                gap: 0.7rem 1.4rem;
+            }
+            .demo-iframe-container {
+                /* На мобильных делаем чуть выше */
+                padding-bottom: 70%;
+            }
+        }
+    </style>
+</head>
+<body>
+ 
+    <canvas id="starfield-canvas" aria-hidden="true"></canvas>
+ 
+    <!-- НАВИГАЦИЯ -->
+    <header class="site-header" id="site-header" role="banner">
+        <nav class="main-nav" aria-label="Главная навигация">
+            <a href="#hero" class="nav-logo" aria-label="На главную">
+                <span class="logo-icon">◈</span>
+                <span class="logo-text">Starfixer</span>
+            </a>
+            <button class="menu-toggle" id="menu-toggle" aria-label="Открыть меню" aria-expanded="false">
+                <span class="menu-toggle-bar"></span>
+                <span class="menu-toggle-bar"></span>
+                <span class="menu-toggle-bar"></span>
+            </button>
+            <ul class="nav-links" id="nav-links" role="list">
+                <li><a href="#story"    class="nav-link">Сюжет</a></li>
+                <li><a href="#features" class="nav-link">Особенности</a></li>
+                <li><a href="#demo"     class="nav-link" style="color:#00d4ff;">▶ Играть</a></li>
+                <li><a href="#mechanics" class="nav-link">Механики</a></li>
+                <li><a href="#gallery"  class="nav-link">Галерея</a></li>
+                <li><a href="#choice"   class="nav-link">Финал</a></li>
+            </ul>
+        </nav>
+    </header>
+ 
+    <main class="site-main" role="main">
+ 
+        <!-- HERO -->
+        <section class="hero-section" id="hero" aria-labelledby="hero-title">
+            <div class="hero-content">
+                <div class="hero-particles" aria-hidden="true">
+                    <span class="particle p1"></span>
+                    <span class="particle p2"></span>
+                    <span class="particle p3"></span>
+                    <span class="particle p4"></span>
+                    <span class="particle p5"></span>
+                    <span class="particle p6"></span>
+                </div>
+                <h1 class="hero-title" id="hero-title">
+                    <span class="title-top">Starfixer</span>
+                    <span class="title-divider" aria-hidden="true"></span>
+                    <span class="title-bottom">Последний сигнал</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Восстановите корабль. Раскройте тайну. Решите судьбу древней цивилизации.
+                </p>
+                <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+                    <a href="#story" class="hero-cta pulse-glow">
+                        Начать путешествие
+                        <span class="cta-arrow" aria-hidden="true">▾</span>
+                    </a>
+                    <a href="#demo" class="hero-cta" style="background:rgba(0,212,255,0.18);border-color:#00d4ff;box-shadow:0 0 20px rgba(0,212,255,0.3);">
+                        ▶ Играть сейчас
+                    </a>
+                </div>
+            </div>
+            <div class="hero-energy-line" aria-hidden="true"></div>
+        </section>
+ 
+        <!-- СЮЖЕТ -->
+        <section class="story-section section-reveal" id="story" aria-labelledby="story-title">
+            <div class="section-container">
+                <h2 class="section-title" id="story-title">
+                    <span class="title-accent">▸</span> Сюжет
+                </h2>
+                <div class="story-grid">
+                    <div class="story-text">
+                        <p class="story-paragraph">
+                            После катастрофы в глубоком космосе загадочный энергетический организм
+                            <strong class="highlight-energy">Кси'Ра</strong> приходит в себя среди руин
+                            древней орбитальной станции. Системы разрушены, связь потеряна, а
+                            единственная надежда на спасение — восстановить повреждённый корабль,
+                            разбросанные части которого скрыты в самых опасных секторах.
+                        </p>
+                        <p class="story-paragraph">
+                            Исследуйте заброшенный комплекс, созданный давно исчезнувшей цивилизацией,
+                            чьи технологии подчиняются собственным законам логики. Управляйте потоками
+                            энергии, активируйте древние механизмы, обходите неисправные системы и
+                            раскрывайте тайну станции через фрагменты сигналов.
+                        </p>
+                        <p class="story-paragraph">
+                            <strong>Кси'Ра</strong> способен становиться частью энергетических цепей,
+                            перемещаться по проводящим системам и использовать собственный запас
+                            энергии для питания устройств. Но каждый импульс расходует драгоценный
+                            ресурс — каждое решение имеет значение.
+                        </p>
+                    </div>
+                    <div class="story-image-placeholder" aria-label="Место для изображения Кси'Ра или станции">
+                        <div class="placeholder-content">
+                            <span class="placeholder-icon">◈</span>
+                            <span class="placeholder-text">Изображение игры</span>
+                            <span class="placeholder-hint">Замените на свой скриншот или арт</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+ 
+        <!-- ОСОБЕННОСТИ -->
+        <section class="features-section section-reveal" id="features" aria-labelledby="features-title">
+            <div class="section-container">
+                <h2 class="section-title" id="features-title">
+                    <span class="title-accent">▸</span> Особенности игры
+                </h2>
+                <div class="features-grid">
+                    <article class="feature-card" tabindex="0">
+                        <div class="feature-icon" aria-hidden="true">⚡</div>
+                        <h3 class="feature-title">Энергетические цепи</h3>
+                        <p class="feature-desc">Прокладывайте пути энергии через древние системы, замыкайте контуры и оживляйте механизмы станции.</p>
+                    </article>
+                    <article class="feature-card" tabindex="0">
+                        <div class="feature-icon" aria-hidden="true">🧩</div>
+                        <h3 class="feature-title">Логические головоломки</h3>
+                        <p class="feature-desc">Переключатели, таймеры, элементы AND, OR и NOT — собирайте схемы и находите нестандартные решения.</p>
+                    </article>
+                    <article class="feature-card" tabindex="0">
+                        <div class="feature-icon" aria-hidden="true">🪐</div>
+                        <h3 class="feature-title">Гравитационные зоны</h3>
+                        <p class="feature-desc">Нормальная, нулевая и перевёрнутая гравитация меняют восприятие пространства и открывают новые пути.</p>
+                    </article>
+                    <article class="feature-card" tabindex="0">
+                        <div class="feature-icon" aria-hidden="true">🔍</div>
+                        <h3 class="feature-title">Скрытые секреты</h3>
+                        <p class="feature-desc">Десятки тайных областей и дополнительных загадок ждут самых внимательных исследователей.</p>
+                    </article>
+                    <article class="feature-card" tabindex="0">
+                        <div class="feature-icon" aria-hidden="true">📡</div>
+                        <h3 class="feature-title">Сюжет через окружение</h3>
+                        <p class="feature-desc">Минималистичное повествование: фрагменты сигналов, следы эксперимента и сама станция расскажут историю.</p>
+                    </article>
+                    <article class="feature-card" tabindex="0">
+                        <div class="feature-icon" aria-hidden="true">🔀</div>
+                        <h3 class="feature-title">Несколько путей</h3>
+                        <p class="feature-desc">У каждой задачи есть альтернативные решения — выбирайте свой стиль прохождения.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+ 
+        <!-- ===== ДЕМО-СЕКЦИЯ ===== -->
+        <section class="demo-section section-reveal" id="demo" aria-labelledby="demo-title">
+            <div class="section-container">
+                <h2 class="section-title" id="demo-title">
+                    <span class="title-accent">▸</span> Играть прямо сейчас
+                </h2>
+                <p class="demo-intro">
+                    Полная браузерная демо — все 6 актов, без установки.
+                    Кликните по экрану, чтобы активировать управление клавиатурой.
+                </p>
+ 
+                <div class="demo-frame-wrap">
+                    <!-- Терминальная шапка -->
+                    <div class="demo-terminal-bar" aria-hidden="true">
+                        <span class="terminal-dot active"></span>
+                        <span class="terminal-dot"></span>
+                        <span class="terminal-dot"></span>
+                        <span class="terminal-label">STARFIXER_DEMO_v2.0 · orbital-station-07</span>
+                        <span class="terminal-status live" id="demo-status">ONLINE</span>
+                    </div>
+ 
+                    <!-- iframe + оверлей -->
+                    <div class="demo-iframe-container">
+                        <!-- Оверлей «запустить» -->
+                        <div class="demo-overlay" id="demo-overlay">
+                            <div class="demo-overlay-icon" aria-hidden="true">◈</div>
+                            <div class="demo-overlay-title">STARFIXER</div>
+                            <div class="demo-overlay-sub">ПОСЛЕДНИЙ СИГНАЛ · ДЕМО</div>
+                            <button class="demo-overlay-btn" id="demo-launch-btn">
+                                ▶ ЗАПУСТИТЬ ИГРУ
+                            </button>
+                        </div>
+ 
+                        <!-- Игра загружается по клику — src установит JS -->
+                        <iframe
+                            id="game-iframe"
+                            title="Starfixer: Последний сигнал — браузерная демо"
+                            allow="autoplay"
+                            sandbox="allow-scripts allow-same-origin"
+                        ></iframe>
+                    </div>
+                </div>
+ 
+                <!-- Подсказки управления -->
+                <div class="demo-controls-hint" aria-label="Управление в игре">
+                    <div class="hint-item">
+                        <span class="hint-key">← →</span>
+                        <span>Движение</span>
+                    </div>
+                    <div class="hint-item">
+                        <span class="hint-key">↑ / Z</span>
+                        <span>Прыжок</span>
+                    </div>
+                    <div class="hint-item">
+                        <span class="hint-key">SPACE / F</span>
+                        <span>Активировать</span>
+                    </div>
+                    <div class="hint-item">
+                        <span class="hint-key">R</span>
+                        <span>Перезапустить уровень</span>
+                    </div>
+                    <div class="hint-item">
+                        <span class="hint-key">ESC</span>
+                        <span>Пауза</span>
+                    </div>
+                    <div class="hint-item" style="margin-left:auto;color:#445566;">
+                        📱 На мобильном — виртуальные кнопки
+                    </div>
+                </div>
+            </div>
+        </section>
+ 
+        <!-- МЕХАНИКИ -->
+        <section class="mechanics-section section-reveal" id="mechanics" aria-labelledby="mechanics-title">
+            <div class="section-container">
+                <h2 class="section-title" id="mechanics-title">
+                    <span class="title-accent">▸</span> Игровые механики
+                </h2>
+                <div class="mechanics-timeline">
+                    <div class="mech-step">
+                        <div class="mech-marker" aria-hidden="true">1</div>
+                        <div class="mech-content">
+                            <h3>Простые цепи</h3>
+                            <p>Замкните контур, чтобы подать энергию на дверь или платформу.</p>
+                        </div>
+                    </div>
+                    <div class="mech-step">
+                        <div class="mech-marker" aria-hidden="true">2</div>
+                        <div class="mech-content">
+                            <h3>Логические элементы</h3>
+                            <p>Используйте AND, OR и NOT для создания сложных схем активации.</p>
+                        </div>
+                    </div>
+                    <div class="mech-step">
+                        <div class="mech-marker" aria-hidden="true">3</div>
+                        <div class="mech-content">
+                            <h3>Гравитационные поля</h3>
+                            <p>Меняйте гравитацию в секторах, чтобы добраться до недоступных зон.</p>
+                        </div>
+                    </div>
+                    <div class="mech-step">
+                        <div class="mech-marker" aria-hidden="true">4</div>
+                        <div class="mech-content">
+                            <h3>Энергия Кси'Ра</h3>
+                            <p>Расходуйте личный запас энергии для питания устройств — каждый импульс на счету.</p>
+                        </div>
+                    </div>
+                    <div class="mech-step">
+                        <div class="mech-marker" aria-hidden="true">5</div>
+                        <div class="mech-content">
+                            <h3>Модули корабля</h3>
+                            <p>Соберите питание, навигацию, двигатель, связь и корпус для побега.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mechanics-image-placeholder" aria-label="Место для схемы игровых механик">
+                    <div class="placeholder-content">
+                        <span class="placeholder-icon">⚙️</span>
+                        <span class="placeholder-text">Схема механик</span>
+                        <span class="placeholder-hint">Добавьте скриншот геймплея</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+ 
+        <!-- ГАЛЕРЕЯ -->
+        <section class="gallery-section section-reveal" id="gallery" aria-labelledby="gallery-title">
+            <div class="section-container">
+                <h2 class="section-title" id="gallery-title">
+                    <span class="title-accent">▸</span> Галерея
+                </h2>
+                <div class="gallery-grid">
+                    <div class="gallery-slot"><div class="gallery-placeholder"><span>Скриншот 1</span><small>Добавьте изображение</small></div></div>
+                    <div class="gallery-slot"><div class="gallery-placeholder"><span>Скриншот 2</span><small>Добавьте изображение</small></div></div>
+                    <div class="gallery-slot"><div class="gallery-placeholder"><span>Скриншот 3</span><small>Добавьте изображение</small></div></div>
+                    <div class="gallery-slot"><div class="gallery-placeholder"><span>Скриншот 4</span><small>Добавьте изображение</small></div></div>
+                    <div class="gallery-slot"><div class="gallery-placeholder"><span>Скриншот 5</span><small>Добавьте изображение</small></div></div>
+                    <div class="gallery-slot"><div class="gallery-placeholder"><span>Скриншот 6</span><small>Добавьте изображение</small></div></div>
+                </div>
+            </div>
+        </section>
+ 
+        <!-- ФИНАЛЬНЫЙ ВЫБОР -->
+        <section class="choice-section section-reveal" id="choice" aria-labelledby="choice-title">
+            <div class="section-container">
+                <h2 class="section-title" id="choice-title">
+                    <span class="title-accent">▸</span> Финальный выбор
+                </h2>
+                <p class="choice-intro">Когда правда о прошлом станции станет известна, вам предстоит решить:</p>
+                <div class="choice-cards">
+                    <article class="choice-card choice-leave" tabindex="0">
+                        <div class="choice-card-inner">
+                            <span class="choice-icon" aria-hidden="true">🚀</span>
+                            <h3>Улететь</h3>
+                            <p>Покинуть станцию навстречу неизвестности. Спасти себя и унести тайну древней цивилизации в глубины космоса.</p>
+                        </div>
+                        <div class="choice-glow" aria-hidden="true"></div>
+                    </article>
+                    <div class="choice-divider" aria-hidden="true"><span>ИЛИ</span></div>
+                    <article class="choice-card choice-stay" tabindex="0">
+                        <div class="choice-card-inner">
+                            <span class="choice-icon" aria-hidden="true">🏛️</span>
+                            <h3>Остаться</h3>
+                            <p>Вернуть к жизни последнее наследие древней цивилизации. Пожертвовать свободой ради возрождения станции.</p>
+                        </div>
+                        <div class="choice-glow" aria-hidden="true"></div>
+                    </article>
+                </div>
+                <p class="choice-question">
+                    В мире, где энергия может мыслить, а технологии обладают собственной волей,
+                    главный вопрос не в том, <em>сможете ли вы починить корабль</em>,
+                    а в том — <strong>что вы решите спасти?</strong>
+                </p>
+            </div>
+        </section>
+ 
+    </main>
+ 
+    <footer class="site-footer" role="contentinfo">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <span class="footer-logo">◈ Starfixer</span>
+                <span class="footer-tagline">Последний сигнал</span>
+            </div>
+            <div class="footer-links">
+                <a href="#hero"     class="footer-link">Наверх</a>
+                <a href="#story"    class="footer-link">Сюжет</a>
+                <a href="#demo"     class="footer-link">Демо</a>
+                <a href="#features" class="footer-link">Особенности</a>
+                <a href="#gallery"  class="footer-link">Галерея</a>
+            </div>
+            <p class="footer-copy">&copy; 2026 Starfixer. Все права защищены.</p>
+        </div>
+    </footer>
+ 
+    <script src="script.js"></script>
+ 
+    <script>
+    // ===== ДЕМО: запуск игры в iframe =====
+    (function () {
+        const overlay  = document.getElementById('demo-overlay');
+        const iframe   = document.getElementById('game-iframe');
+        const launchBtn = document.getElementById('demo-launch-btn');
+        const status   = document.getElementById('demo-status');
+ 
+        // Путь к папке с игрой — поменяйте если нужно
+        // Если game/index.html лежит рядом с этим файлом — просто 'game/index.html'
+        const GAME_URL = 'game/index.html';
+ 
+        let loaded = false;
+ 
+        function launchGame() {
+            if (!loaded) {
+                // Первый запуск — грузим iframe
+                status.textContent = 'ЗАГРУЗКА...';
+                status.classList.remove('live');
+ 
+                iframe.src = GAME_URL;
+                iframe.addEventListener('load', function onLoad() {
+                    iframe.removeEventListener('load', onLoad);
+                    loaded = true;
+                    status.textContent = 'ONLINE';
+                    status.classList.add('live');
+                });
+                loaded = true; // не грузить повторно
+            }
+            // Скрываем оверлей
+            overlay.classList.add('hidden');
+            // Фокус в iframe чтобы клавиатура сразу работала
+            setTimeout(() => iframe.focus(), 200);
+        }
+ 
+        launchBtn.addEventListener('click', launchGame);
+        overlay.addEventListener('click', function(e) {
+            // Клик по фону оверлея тоже запускает
+            if (e.target === overlay) launchGame();
+        });
+ 
+        // Клик по самому iframe возвращает ему фокус если потеряли
+        iframe.addEventListener('click', () => iframe.focus());
+    })();
+    </script>
+</body>
+</html>
+ 
