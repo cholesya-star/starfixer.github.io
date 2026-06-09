@@ -1,0 +1,609 @@
+/* ============================================================
+   STARFIXER v2 — style.css
+   Тема: тёмный космос + неон (голубой/фиолетовый)
+   Все цвета через CSS-переменные — удобно менять тему.
+============================================================ */
+
+/* ---- Переменные темы ---- */
+:root {
+  --bg0:      #040810;   /* самый тёмный фон */
+  --bg1:      #080f20;   /* основной фон */
+  --bg2:      #0d1830;   /* поверхность панелей */
+  --bg3:      #132040;   /* поверхность карточек */
+  --neon:     #00d4ff;   /* голубой неон — энергия */
+  --neon2:    #7b4fff;   /* фиолетовый — тайна */
+  --danger:   #ff3355;   /* красный — угроза */
+  --warn:     #ffaa00;   /* оранжевый — предупреждение */
+  --text:     #b8d8f8;   /* основной текст */
+  --text-dim: #4a6a8a;   /* приглушённый текст */
+  --border:   rgba(0,212,255,0.18);
+  --glow-sm:  0 0 8px rgba(0,212,255,0.5);
+  --glow-md:  0 0 20px rgba(0,212,255,0.4);
+  --glow-lg:  0 0 50px rgba(0,212,255,0.3);
+}
+
+/* ---- Сброс ---- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--bg0);
+  font-family: 'Courier New', Courier, monospace;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+/* ============================================================
+   ЭКРАНЫ
+============================================================ */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+.screen.active { display: flex; }
+
+/* Фоновое изображение (если передано) */
+.bg-image {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  filter: brightness(0.35) saturate(0.5);
+  z-index: 0;
+}
+
+/* Процедурный фон-canvas (звёзды / частицы) */
+.bg-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Содержимое поверх фона */
+.splash-content, .menu-panel, .info-panel,
+.cutscene-wrap, .pause-panel, .win-panel,
+.final-panel, .ending-wrap {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 36px 28px;
+}
+
+/* ============================================================
+   СПЛЭШ
+============================================================ */
+.logo-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.logo-glyph {
+  font-size: 2.5rem;
+  color: var(--neon);
+  animation: spin-slow 12s linear infinite;
+  text-shadow: var(--glow-md);
+}
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+
+.game-title {
+  font-size: clamp(2.8rem, 9vw, 6.5rem);
+  letter-spacing: 0.22em;
+  color: var(--neon);
+  text-shadow:
+    0 0 6px var(--neon),
+    0 0 25px rgba(0,212,255,0.6),
+    0 0 70px rgba(0,212,255,0.3);
+  animation: title-flicker 5s ease-in-out infinite;
+}
+@keyframes title-flicker {
+  0%,100%  { opacity: 1; }
+  92%      { opacity: 1; }
+  93%      { opacity: 0.7; }
+  94%      { opacity: 1; }
+  96%      { opacity: 0.85; }
+  97%      { opacity: 1; }
+}
+
+.game-subtitle {
+  font-size: clamp(0.75rem, 2vw, 1rem);
+  letter-spacing: 0.45em;
+  color: var(--neon2);
+  text-shadow: 0 0 8px var(--neon2);
+}
+
+.splash-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.version-tag {
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+  margin-top: 8px;
+}
+
+/* ============================================================
+   КНОПКИ
+============================================================ */
+.btn-primary {
+  padding: 13px 44px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: bold;
+  letter-spacing: 0.18em;
+  color: var(--bg0);
+  background: var(--neon);
+  border: none;
+  cursor: pointer;
+  clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+  box-shadow: var(--glow-sm), inset 0 1px 0 rgba(255,255,255,0.2);
+  transition: transform 0.1s, box-shadow 0.2s;
+}
+.btn-primary:hover {
+  transform: scale(1.05);
+  box-shadow: var(--glow-md);
+}
+.btn-primary:active { transform: scale(0.97); }
+
+.btn-outline {
+  padding: 10px 28px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  letter-spacing: 0.15em;
+  color: var(--neon);
+  background: transparent;
+  border: 1px solid rgba(0,212,255,0.4);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.btn-outline:hover { background: rgba(0,212,255,0.1); border-color: var(--neon); }
+.btn-outline.small { padding: 7px 18px; font-size: 0.8rem; }
+
+.menu-btn {
+  width: 280px;
+  padding: 13px 0;
+  font-family: inherit;
+  font-size: 0.95rem;
+  letter-spacing: 0.14em;
+  color: var(--text);
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, text-shadow 0.2s;
+}
+.menu-btn:hover {
+  background: rgba(0,212,255,0.12);
+  border-color: var(--neon);
+  color: var(--neon);
+  text-shadow: 0 0 8px var(--neon);
+}
+
+/* ============================================================
+   МЕНЮ
+============================================================ */
+.menu-title {
+  font-size: 1.4rem;
+  letter-spacing: 0.3em;
+  color: var(--neon);
+  text-shadow: var(--glow-sm);
+  margin-bottom: 8px;
+}
+
+/* ============================================================
+   УПРАВЛЕНИЕ (инфо-панель)
+============================================================ */
+.info-panel {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  max-width: 520px;
+  width: 92%;
+  gap: 20px;
+}
+.info-panel h2 {
+  font-size: 1.3rem;
+  letter-spacing: 0.3em;
+  color: var(--neon);
+  text-shadow: var(--glow-sm);
+}
+.controls-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 20px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.key {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  padding: 2px 8px;
+  color: var(--neon);
+  white-space: nowrap;
+  font-size: 0.8rem;
+}
+.touch-note { font-size: 0.8rem; color: var(--text-dim); }
+
+/* ============================================================
+   КАТСЦЕНА
+============================================================ */
+.cutscene-wrap {
+  max-width: 660px;
+  width: 92%;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.signal-bar {
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--neon), transparent);
+  animation: scan 2s linear infinite;
+}
+@keyframes scan {
+  0%   { opacity: 0.4; }
+  50%  { opacity: 1; }
+  100% { opacity: 0.4; }
+}
+
+.cut-text {
+  font-size: 1.05rem;
+  line-height: 2;
+  color: var(--text);
+  min-height: 160px;
+  white-space: pre-line;
+  /* Мигающий курсор на конце — создаётся через ::after в JS-добавляемом классе */
+}
+.cut-text.typing::after {
+  content: '▌';
+  color: var(--neon);
+  animation: blink 0.7s step-end infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ============================================================
+   ИГРОВОЙ ЭКРАН
+============================================================ */
+#screen-game {
+  background: var(--bg0);
+  display: none;
+  position: relative;
+}
+#screen-game.active { display: block; }
+
+#game-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  display: block;
+}
+
+/* ---- HUD ---- */
+#hud {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  background: linear-gradient(to bottom, rgba(4,8,16,0.92), transparent);
+  z-index: 10;
+  pointer-events: none;
+}
+
+#hud-left { display: flex; align-items: center; gap: 8px; }
+.hud-row  { display: flex; align-items: center; gap: 6px; }
+.hud-lbl  { font-size: 0.65rem; letter-spacing: 0.1em; color: var(--text-dim); }
+
+.bar-wrap {
+  width: 100px;
+  height: 6px;
+  background: var(--bg3);
+  border: 1px solid rgba(0,212,255,0.2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+#energy-bar {
+  height: 100%;
+  width: 100%;
+  border-radius: 3px;
+  background: var(--neon);
+  transition: width 0.25s ease, background 0.3s;
+  box-shadow: 0 0 5px var(--neon);
+}
+#energy-val {
+  font-size: 0.78rem;
+  color: var(--neon);
+  min-width: 26px;
+}
+
+#hud-center { flex: 1; text-align: center; }
+#hud-level-name { font-size: 0.72rem; letter-spacing: 0.1em; color: var(--text-dim); }
+
+#hud-right { display: flex; align-items: center; }
+#module-icons { display: flex; gap: 6px; }
+.mod-ic {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,212,255,0.25);
+  background: var(--bg2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.58rem;
+  color: var(--text-dim);
+  transition: all 0.4s;
+  pointer-events: all;
+}
+.mod-ic.found {
+  border-color: var(--neon);
+  color: var(--neon);
+  background: rgba(0,212,255,0.15);
+  box-shadow: 0 0 8px rgba(0,212,255,0.5);
+}
+
+/* ---- Подсказка взаимодействия ---- */
+#interact-hint {
+  position: absolute;
+  bottom: 80px; left: 50%;
+  transform: translateX(-50%);
+  background: rgba(8,15,32,0.85);
+  border: 1px solid rgba(0,212,255,0.35);
+  padding: 6px 18px;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--neon);
+  z-index: 15;
+  animation: hint-pulse 1.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes hint-pulse {
+  0%,100% { opacity: 0.7; }
+  50%     { opacity: 1; }
+}
+#interact-hint.hidden { display: none; }
+
+/* ---- Диалог ---- */
+#dialog {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 70px;
+  z-index: 20;
+  background: rgba(4,8,16,0.35);
+  backdrop-filter: blur(2px);
+}
+#dialog.hidden { display: none; }
+.dialog-inner {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 18px 24px;
+  max-width: 520px;
+  width: 92%;
+  box-shadow: var(--glow-sm);
+  animation: slide-up 0.2s ease both;
+}
+@keyframes slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+#dialog-text { font-size: 0.88rem; line-height: 1.7; margin-bottom: 12px; }
+#dialog-ok {
+  float: right;
+  padding: 6px 20px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  color: var(--neon);
+  background: transparent;
+  border: 1px solid rgba(0,212,255,0.5);
+  cursor: pointer;
+  letter-spacing: 0.1em;
+}
+#dialog-ok:hover { background: rgba(0,212,255,0.12); }
+
+/* ---- Пауза кнопка ---- */
+#btn-pause {
+  position: absolute;
+  top: 8px; right: 12px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  background: transparent;
+  border: 1px solid rgba(0,212,255,0.2);
+  padding: 3px 9px;
+  cursor: pointer;
+  z-index: 11;
+  letter-spacing: 0.1em;
+  transition: color 0.2s, border-color 0.2s;
+}
+#btn-pause:hover { color: var(--neon); border-color: var(--neon); }
+
+/* ---- Подсказка клавиатуры ---- */
+#kb-hint {
+  position: absolute;
+  bottom: 8px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.62rem;
+  color: rgba(74,106,138,0.6);
+  letter-spacing: 0.07em;
+  z-index: 10;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* ---- Виртуальные кнопки (мобильные) ---- */
+#vpad {
+  display: none; /* показывается JS на touch-устройствах */
+  position: absolute;
+  bottom: 16px;
+  left: 0; right: 0;
+  justify-content: space-between;
+  padding: 0 18px;
+  z-index: 12;
+  pointer-events: none;
+}
+#vpad.visible { display: flex; }
+#vpad-left, #vpad-right {
+  display: flex;
+  gap: 10px;
+  pointer-events: all;
+}
+.vbtn {
+  width: 54px; height: 54px;
+  border-radius: 50%;
+  background: rgba(0,212,255,0.12);
+  border: 1px solid rgba(0,212,255,0.4);
+  color: var(--neon);
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  transition: background 0.1s;
+}
+.vbtn:active { background: rgba(0,212,255,0.3); }
+
+/* ============================================================
+   ПАУЗА
+============================================================ */
+.pause-panel {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 40px 50px;
+  gap: 14px;
+  box-shadow: var(--glow-md);
+  align-items: center;
+}
+.pause-glyph { font-size: 2.5rem; color: var(--neon); opacity: 0.6; }
+.pause-panel h2 {
+  font-size: 1.5rem;
+  letter-spacing: 0.3em;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+/* ============================================================
+   ПОБЕДА
+============================================================ */
+.win-panel {
+  background: var(--bg2);
+  border: 1px solid rgba(0,212,255,0.3);
+  padding: 40px 50px;
+  max-width: 480px;
+  width: 92%;
+  box-shadow: var(--glow-lg);
+  gap: 14px;
+  align-items: center;
+}
+.win-icon {
+  font-size: 3rem;
+  color: var(--neon);
+  text-shadow: var(--glow-md);
+  animation: win-spin 3s linear infinite;
+}
+@keyframes win-spin { to { transform: rotate(360deg); } }
+#win-title {
+  font-size: 1.5rem;
+  letter-spacing: 0.2em;
+  color: var(--neon);
+  text-shadow: var(--glow-sm);
+}
+#win-desc { font-size: 0.88rem; line-height: 1.7; text-align: center; max-width: 360px; }
+#win-modules { display: flex; gap: 10px; margin-top: 4px; }
+
+/* ============================================================
+   ФИНАЛ
+============================================================ */
+.final-panel {
+  background: rgba(4,8,16,0.8);
+  border: 1px solid rgba(0,212,255,0.2);
+  padding: 44px 50px;
+  max-width: 540px;
+  width: 92%;
+  gap: 18px;
+  align-items: center;
+  backdrop-filter: blur(4px);
+}
+.final-title {
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  letter-spacing: 0.2em;
+  color: var(--neon);
+  text-shadow: var(--glow-md);
+}
+.final-desc {
+  font-size: 0.9rem;
+  line-height: 1.9;
+  text-align: center;
+  color: var(--text);
+}
+.final-choice { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+
+/* ============================================================
+   КОНЦОВКА
+============================================================ */
+.ending-wrap { max-width: 640px; width: 92%; gap: 28px; }
+.ending-text {
+  font-size: 1rem;
+  line-height: 2;
+  color: var(--text);
+  white-space: pre-line;
+  min-height: 200px;
+}
+
+/* ============================================================
+   СКАНЛАЙН (атмосфера)
+   Закомментируй :root::after, если мешает производительности
+============================================================ */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px, transparent 3px,
+    rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ============================================================
+   АНИМАЦИИ ПОЯВЛЕНИЯ
+============================================================ */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.screen.active .splash-content,
+.screen.active .menu-panel,
+.screen.active .win-panel,
+.screen.active .final-panel,
+.screen.active .pause-panel {
+  animation: fade-up 0.4s ease both;
+}
+
+/* ============================================================
+   АДАПТИВ
+============================================================ */
+@media (max-width: 560px) {
+  .game-title    { font-size: 2.4rem; letter-spacing: 0.1em; }
+  .menu-btn      { width: 230px; }
+  .bar-wrap      { width: 72px; }
+  #kb-hint       { display: none; }
+}
