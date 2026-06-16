@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Starfixer: Последний сигнал</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- ============================================================
+     ЭКРАН СПЛЭША
+     PLACEHOLDER_MAIN: замени src на ссылку на картинку главного экрана
+============================================================ -->
+<div id="screen-splash" class="screen active">
+  <img class="bg-image" src="PLACEHOLDER_MAIN_SCREEN" alt=""
+       onerror="this.style.display='none'"/>
+  <!-- Процедурный фон (звёзды рисуются canvas'ом в JS, если нет картинки) -->
+  <canvas id="splash-canvas" class="bg-canvas"></canvas>
+  <div class="splash-content">
+    <div class="logo-wrap">
+      <div class="logo-glyph">✦</div>
+      <h1 class="game-title">STARFIXER</h1>
+      <p class="game-subtitle">ПОСЛЕДНИЙ СИГНАЛ</p>
+    </div>
+    <div class="splash-buttons">
+      <button id="btn-start" class="btn-primary">▶ НАЧАТЬ</button>
+      <button id="btn-menu"  class="btn-outline">МЕНЮ</button>
+    </div>
+    <p class="version-tag">v2.0 · браузерная демо</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     ЭКРАН МЕНЮ
+     PLACEHOLDER_MENU: замени src на ссылку на картинку меню
+============================================================ -->
+<div id="screen-menu" class="screen">
+  <img class="bg-image" src="PLACEHOLDER_MENU_SCREEN" alt=""
+       onerror="this.style.display='none'"/>
+  <canvas id="menu-canvas" class="bg-canvas"></canvas>
+  <div class="menu-panel">
+    <h2 class="menu-title">— МЕНЮ —</h2>
+    <button class="menu-btn" id="menu-new">⚡ Новая игра</button>
+    <button class="menu-btn" id="menu-cont">▶ Продолжить</button>
+    <button class="menu-btn" id="menu-ctrl">⌨ Управление</button>
+    <button class="menu-btn" id="menu-back">← Назад</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     ЭКРАН УПРАВЛЕНИЯ
+============================================================ -->
+<div id="screen-controls" class="screen">
+  <div class="info-panel">
+    <h2>УПРАВЛЕНИЕ</h2>
+    <div class="controls-grid">
+      <span class="key">← →</span><span>Движение</span>
+      <span class="key">↑ / Z</span><span>Прыжок / Полёт в невесомости</span>
+      <span class="key">↓</span><span>Приседание / Полёт вниз</span>
+      <span class="key">SPACE / F</span><span>Активировать (переключатель, телепорт)</span>
+      <span class="key">ESC</span><span>Пауза</span>
+      <span class="key">R</span><span>Перезапустить уровень</span>
+    </div>
+    <p class="touch-note">📱 На мобильном: виртуальные кнопки появятся автоматически.</p>
+    <button class="btn-outline" id="ctrl-back">← Назад</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     КАТСЦЕНА / ПРОЛОГ
+     PLACEHOLDER_SHIP: замени src на картинку повреждённого корабля
+============================================================ -->
+<div id="screen-cutscene" class="screen">
+  <img class="bg-image" src="PLACEHOLDER_SHIP_DAMAGED" alt=""
+       onerror="this.style.display='none'"/>
+  <canvas id="cut-canvas" class="bg-canvas"></canvas>
+  <div class="cutscene-wrap">
+    <div class="signal-bar"></div>
+    <div id="cut-text" class="cut-text"></div>
+    <button id="btn-skip" class="btn-outline small">ПРОПУСТИТЬ →</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     ИГРОВОЙ ЭКРАН
+============================================================ -->
+<div id="screen-game" class="screen">
+  <!-- HUD -->
+  <div id="hud">
+    <div id="hud-left">
+      <div class="hud-row">
+        <span class="hud-lbl">ЭНГ</span>
+        <div class="bar-wrap"><div id="energy-bar"></div></div>
+        <span id="energy-val">100</span>
+      </div>
+    </div>
+    <div id="hud-center">
+      <span id="hud-level-name">Акт I</span>
+    </div>
+    <div id="hud-right">
+      <div id="module-icons"><!-- JS --></div>
+    </div>
+  </div>
+
+  <!-- Холст игры -->
+  <canvas id="game-canvas"></canvas>
+
+  <!-- Плашка «подсказка взаимодействия» -->
+  <div id="interact-hint" class="hidden">
+    <span id="interact-text">SPACE — активировать</span>
+  </div>
+
+  <!-- Диалог -->
+  <div id="dialog" class="hidden">
+    <div class="dialog-inner">
+      <p id="dialog-text"></p>
+      <button id="dialog-ok">OK</button>
+    </div>
+  </div>
+
+  <!-- Пауза -->
+  <button id="btn-pause" title="Пауза (ESC)">❙❙</button>
+
+  <!-- Подсказка управления -->
+  <div id="kb-hint">← → прыжок:↑  активация:SPACE  пауза:ESC</div>
+
+  <!-- Виртуальные кнопки (мобильные) -->
+  <div id="vpad">
+    <div id="vpad-left">
+      <button class="vbtn" id="vb-left">◀</button>
+      <button class="vbtn" id="vb-right">▶</button>
+    </div>
+    <div id="vpad-right">
+      <button class="vbtn" id="vb-up">▲</button>
+      <button class="vbtn" id="vb-act">⚡</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     ПАУЗА
+============================================================ -->
+<div id="screen-pause" class="screen">
+  <div class="pause-panel">
+    <div class="pause-glyph">❙❙</div>
+    <h2>ПАУЗА</h2>
+    <button class="menu-btn" id="pause-res">▶ Продолжить</button>
+    <button class="menu-btn" id="pause-restart">↺ Перезапустить</button>
+    <button class="menu-btn" id="pause-home">⌂ Меню</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     ПОБЕДА НА УРОВНЕ
+============================================================ -->
+<div id="screen-win" class="screen">
+  <div class="win-panel">
+    <div class="win-icon" id="win-icon">✦</div>
+    <h2 id="win-title">МОДУЛЬ НАЙДЕН</h2>
+    <p  id="win-desc"></p>
+    <div id="win-modules"><!-- иконки найденных модулей --></div>
+    <button class="btn-primary" id="btn-next">ДАЛЕЕ →</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     ФИНАЛ
+     PLACEHOLDER_SPACE: замени src на фон открытого космоса
+============================================================ -->
+<div id="screen-final" class="screen">
+  <img class="bg-image" src="PLACEHOLDER_SPACE" alt=""
+       onerror="this.style.display='none'"/>
+  <canvas id="final-canvas" class="bg-canvas"></canvas>
+  <div class="final-panel">
+    <h2 class="final-title">СТАНЦИЯ ПРОБУДИЛАСЬ</h2>
+    <p class="final-desc">Все модули на месте. Корабль исправен.<br>
+       Энергия течёт — она живая.<br>
+       Кси'Ра стоит у шлюза.</p>
+    <div class="final-choice">
+      <button class="btn-primary" id="final-leave">🚀 УЛЕТЕТЬ</button>
+      <button class="btn-outline" id="final-stay">💡 ОСТАТЬСЯ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     ЭКРАН КОНЦА (финальный текст)
+============================================================ -->
+<div id="screen-ending" class="screen">
+  <canvas id="end-canvas" class="bg-canvas"></canvas>
+  <div class="ending-wrap">
+    <div id="ending-text" class="ending-text"></div>
+    <button class="btn-outline" id="end-menu">⌂ В ГЛАВНОЕ МЕНЮ</button>
+  </div>
+</div>
+
+<script src="main.js"></script>
+</body>
+</html>
