@@ -25,27 +25,27 @@
             z-index: 0;
             pointer-events: none;
         }
- 
+
         /* ===== DEMO SECTION ===== */
         .demo-section {
             position: relative;
             z-index: 1;
             padding: 6rem 0 4rem;
         }
- 
+
         .demo-section .section-container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 2rem;
         }
- 
+
         .demo-intro {
             color: #a0a0b8;
             font-size: 1.05rem;
             margin-bottom: 2rem;
             max-width: 640px;
         }
- 
+
         /* Обёртка с рамкой-рамкой как у терминала */
         .demo-frame-wrap {
             position: relative;
@@ -58,7 +58,7 @@
                 0 0 60px rgba(0, 212, 255, 0.08),
                 inset 0 0 80px rgba(0,0,0,0.6);
         }
- 
+
         /* Декоративная «шапка» терминала */
         .demo-terminal-bar {
             display: flex;
@@ -68,7 +68,7 @@
             background: rgba(0, 212, 255, 0.04);
             border-bottom: 1px solid rgba(0,212,255,0.12);
         }
- 
+
         .terminal-dot {
             width: 10px;
             height: 10px;
@@ -80,7 +80,7 @@
             background: rgba(0,212,255,0.55);
             box-shadow: 0 0 6px rgba(0,212,255,0.5);
         }
- 
+
         .terminal-label {
             margin-left: 8px;
             font-family: 'Courier New', monospace;
@@ -88,7 +88,7 @@
             letter-spacing: 0.12em;
             color: rgba(0,212,255,0.45);
         }
- 
+
         .terminal-status {
             margin-left: auto;
             font-family: 'Courier New', monospace;
@@ -102,7 +102,7 @@
         .terminal-status.live::before {
             content: '● ';
         }
- 
+
         /* iframe обёртка с адаптивным соотношением сторон */
         .demo-iframe-container {
             position: relative;
@@ -111,7 +111,7 @@
             padding-bottom: 56.25%;
             background: #040810;
         }
- 
+
         .demo-iframe-container iframe {
             position: absolute;
             inset: 0;
@@ -120,7 +120,7 @@
             border: none;
             display: block;
         }
- 
+
         /* Оверлей «нажми чтобы начать» поверх iframe */
         .demo-overlay {
             position: absolute;
@@ -135,12 +135,12 @@
             cursor: pointer;
             transition: opacity 0.4s ease;
         }
- 
+
         .demo-overlay.hidden {
             opacity: 0;
             pointer-events: none;
         }
- 
+
         .demo-overlay-icon {
             font-size: 3.5rem;
             color: #00d4ff;
@@ -148,12 +148,12 @@
             margin-bottom: 1rem;
             animation: pulse-overlay 2s infinite alternate;
         }
- 
+
         @keyframes pulse-overlay {
             from { text-shadow: 0 0 15px rgba(0,212,255,0.5); transform: scale(1); }
             to   { text-shadow: 0 0 40px rgba(0,212,255,0.9); transform: scale(1.08); }
         }
- 
+
         .demo-overlay-title {
             font-family: 'Courier New', monospace;
             font-size: clamp(1.4rem, 3vw, 2rem);
@@ -162,7 +162,7 @@
             text-shadow: 0 0 20px rgba(0,212,255,0.5);
             margin-bottom: 0.5rem;
         }
- 
+
         .demo-overlay-sub {
             font-family: 'Courier New', monospace;
             font-size: 0.8rem;
@@ -170,7 +170,7 @@
             color: rgba(0,212,255,0.5);
             margin-bottom: 2rem;
         }
- 
+
         .demo-overlay-btn {
             padding: 12px 40px;
             font-family: 'Courier New', monospace;
@@ -185,12 +185,12 @@
             box-shadow: 0 0 20px rgba(0,212,255,0.5);
             transition: transform 0.15s, box-shadow 0.2s;
         }
- 
+
         .demo-overlay-btn:hover {
             transform: scale(1.05);
             box-shadow: 0 0 35px rgba(0,212,255,0.8);
         }
- 
+
         /* Подсказки управления под игрой */
         .demo-controls-hint {
             display: flex;
@@ -202,7 +202,7 @@
             border: 1px solid rgba(0,212,255,0.1);
             border-radius: 10px;
         }
- 
+
         .hint-item {
             display: flex;
             align-items: center;
@@ -211,7 +211,7 @@
             color: #6a8aaa;
             font-family: 'Courier New', monospace;
         }
- 
+
         .hint-key {
             background: rgba(0,212,255,0.1);
             border: 1px solid rgba(0,212,255,0.25);
@@ -221,7 +221,7 @@
             font-size: 0.75rem;
             white-space: nowrap;
         }
- 
+
         /* Адаптив */
         @media (max-width: 768px) {
             .demo-controls-hint {
@@ -235,9 +235,9 @@
     </style>
 </head>
 <body>
- 
+
     <canvas id="starfield-canvas" aria-hidden="true"></canvas>
- 
+
     <!-- НАВИГАЦИЯ -->
     <header class="site-header" id="site-header" role="banner">
         <nav class="main-nav" aria-label="Главная навигация">
@@ -260,9 +260,9 @@
             </ul>
         </nav>
     </header>
- 
+
     <main class="site-main" role="main">
- 
+
         <!-- HERO -->
         <section class="hero-section" id="hero" aria-labelledby="hero-title">
             <div class="hero-content">
@@ -294,7 +294,7 @@
             </div>
             <div class="hero-energy-line" aria-hidden="true"></div>
         </section>
- 
+
         <!-- СЮЖЕТ -->
         <section class="story-section section-reveal" id="story" aria-labelledby="story-title">
             <div class="section-container">
@@ -333,7 +333,7 @@
                 </div>
             </div>
         </section>
- 
+
         <!-- ОСОБЕННОСТИ -->
         <section class="features-section section-reveal" id="features" aria-labelledby="features-title">
             <div class="section-container">
@@ -374,7 +374,7 @@
                 </div>
             </div>
         </section>
- 
+
         <!-- ===== ДЕМО-СЕКЦИЯ ===== -->
         <section class="demo-section section-reveal" id="demo" aria-labelledby="demo-title">
             <div class="section-container">
@@ -385,7 +385,7 @@
                     Полная браузерная демо — все 6 актов, без установки.
                     Кликните по экрану, чтобы активировать управление клавиатурой.
                 </p>
- 
+
                 <div class="demo-frame-wrap">
                     <!-- Терминальная шапка -->
                     <div class="demo-terminal-bar" aria-hidden="true">
@@ -395,7 +395,7 @@
                         <span class="terminal-label">STARFIXER_DEMO_v2.0 · orbital-station-07</span>
                         <span class="terminal-status live" id="demo-status">ONLINE</span>
                     </div>
- 
+
                     <!-- iframe + оверлей -->
                     <div class="demo-iframe-container">
                         <!-- Оверлей «запустить» -->
@@ -407,7 +407,7 @@
                                 ▶ ЗАПУСТИТЬ ИГРУ
                             </button>
                         </div>
- 
+
                         <!-- Игра загружается по клику — src установит JS -->
                         <iframe
                             id="game-iframe"
@@ -417,7 +417,7 @@
                         ></iframe>
                     </div>
                 </div>
- 
+
                 <!-- Подсказки управления -->
                 <div class="demo-controls-hint" aria-label="Управление в игре">
                     <div class="hint-item">
@@ -446,7 +446,7 @@
                 </div>
             </div>
         </section>
- 
+
         <!-- МЕХАНИКИ -->
         <section class="mechanics-section section-reveal" id="mechanics" aria-labelledby="mechanics-title">
             <div class="section-container">
@@ -499,7 +499,7 @@
                 </div>
             </div>
         </section>
- 
+
         <!-- ГАЛЕРЕЯ -->
         <section class="gallery-section section-reveal" id="gallery" aria-labelledby="gallery-title">
             <div class="section-container">
@@ -516,7 +516,7 @@
                 </div>
             </div>
         </section>
- 
+
         <!-- ФИНАЛЬНЫЙ ВЫБОР -->
         <section class="choice-section section-reveal" id="choice" aria-labelledby="choice-title">
             <div class="section-container">
@@ -550,9 +550,9 @@
                 </p>
             </div>
         </section>
- 
+
     </main>
- 
+
     <footer class="site-footer" role="contentinfo">
         <div class="footer-container">
             <div class="footer-brand">
@@ -569,9 +569,9 @@
             <p class="footer-copy">&copy; 2026 Starfixer. Все права защищены.</p>
         </div>
     </footer>
- 
+
     <script src="script.js"></script>
- 
+
     <script>
     // ===== ДЕМО: запуск игры в iframe =====
     (function () {
@@ -579,19 +579,19 @@
         const iframe   = document.getElementById('game-iframe');
         const launchBtn = document.getElementById('demo-launch-btn');
         const status   = document.getElementById('demo-status');
- 
+
         // Путь к папке с игрой — поменяйте если нужно
         // Если game/index.html лежит рядом с этим файлом — просто 'game/index.html'
         const GAME_URL = 'game/index.html';
- 
+
         let loaded = false;
- 
+
         function launchGame() {
             if (!loaded) {
                 // Первый запуск — грузим iframe
                 status.textContent = 'ЗАГРУЗКА...';
                 status.classList.remove('live');
- 
+
                 iframe.src = GAME_URL;
                 iframe.addEventListener('load', function onLoad() {
                     iframe.removeEventListener('load', onLoad);
@@ -606,17 +606,16 @@
             // Фокус в iframe чтобы клавиатура сразу работала
             setTimeout(() => iframe.focus(), 200);
         }
- 
+
         launchBtn.addEventListener('click', launchGame);
         overlay.addEventListener('click', function(e) {
             // Клик по фону оверлея тоже запускает
             if (e.target === overlay) launchGame();
         });
- 
+
         // Клик по самому iframe возвращает ему фокус если потеряли
         iframe.addEventListener('click', () => iframe.focus());
     })();
     </script>
 </body>
 </html>
- 
